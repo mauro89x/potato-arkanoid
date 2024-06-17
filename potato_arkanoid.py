@@ -169,11 +169,11 @@ def mainLoop():
         if(pygame.sprite.collide_mask(ball, pad)):            
             if ball.rect.x < pad.rect.centerx:
                 if ball.velocity[0] > 0:
-                    ball.velocity[0] = -ball.velocity[0]
+                    ball.velocity[0] = -ball.velocity[0] + (ball.rect.x / 2) * clock.tick(60) / 1000
 
             if ball.rect.x > pad.rect.centerx:
                 if ball.velocity[0] < 0:
-                    ball.velocity[0] = -ball.velocity[0]
+                    ball.velocity[0] = -ball.velocity[0] + (ball.rect.x / 2) * clock.tick(60) / 1000
 
             ball.bounce()
         
