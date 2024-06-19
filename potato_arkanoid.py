@@ -10,6 +10,7 @@ BLACK = (0,0,0)
 WHITE = (255,255,255)
 DARKBLUE = (36,90,190)
 LIGHTBLUE = (0,176,240)
+PLATINUM = (229, 228, 226)
 RED = (255,0,0)
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
@@ -17,15 +18,15 @@ data_dir = os.path.join(main_dir, "assets/sounds")
 global_score = 0
 
 class Brick(pygame.sprite.Sprite):
-    def __init__(self, posx):
+    def __init__(self, posx, health, color, height):
         super().__init__()
         self.image = pygame.Surface([brick_width, brick_height])
         self.image.fill(BLACK)
-        pygame.draw.rect(self.image, RED, [0,0, brick_width, brick_height])
+        pygame.draw.rect(self.image, color, [0,0, brick_width, brick_height])
         self.rect = self.image.get_rect()
         self.rect.x = posx + brick_offset
-        self.rect.y = 100
-        self.health = 2
+        self.rect.y = height
+        self.health = health
         self.score = 1
 
     def setColor(self, aColor):
@@ -142,9 +143,13 @@ def mainLoop():
     ball.rect.x = pad.rect.centerx
     ball.rect.y = pad.rect.top - 10
     offset = 10
-    for i in range(8):
-        brick_list.add(Brick((brick_width + offset) * i))
 
+    for i in range(8):
+        brick_list.add(Brick((brick_width + offset) * i, 2, RED, 100))
+        brick_list.add(Brick((brick_width + offset) * i, 1, BLACK, 130))
+        brick_list.add(Brick((brick_width + offset) * i, 3, PLATINUM, 160))
+
+    
     clock = pygame.time.Clock()
     running = True
     
