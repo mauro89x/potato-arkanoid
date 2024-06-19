@@ -134,6 +134,8 @@ def mainLoop():
     font = pygame.font.Font(None, 32)
     score_tracker = 0
     destroy_brick_sound = load_sound("brick_destroy.wav")
+    hit_brick_sound = load_sound("brick_hit_not_destroy.wav")
+    pad_bounce_ball_sound = load_sound("pad_bounce_ball.wav")
 
     pad = Pad(WHITE, 150, 25)
     ball = Ball(WHITE, 10,10)
@@ -171,7 +173,8 @@ def mainLoop():
         sprites_list.draw(screen)
         brick_list.draw(screen)
 
-        if(pygame.sprite.collide_mask(ball, pad)):            
+        if(pygame.sprite.collide_mask(ball, pad)):
+            pad_bounce_ball_sound.play()
             if ball.rect.x < pad.rect.centerx:
                 if ball.velocity[0] > 0:
                     ball.velocity[0] = -ball.velocity[0] + (ball.rect.x / 2) * clock.tick(60) / 1000
@@ -185,6 +188,7 @@ def mainLoop():
         brick_hit = pygame.sprite.spritecollideany(ball, brick_list)
         if brick_hit:
             brick_hit.health -= 1
+            hit_brick_sound.play()
             if brick_hit.health == 0:
                 brick_list.remove(brick_hit)
                 destroy_brick_sound.play()
@@ -215,3 +219,4 @@ if __name__ == '__main__':
     pygame.mouse.set_visible(False)
     print(f'Screen initialized... {screen.get_width()} x {screen.get_height()}')
     menu()
+    
