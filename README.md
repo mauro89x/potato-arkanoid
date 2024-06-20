@@ -1,9 +1,14 @@
 # potato-arkanoid
 Potato arkanoid is a lame version of classic breakout made in Python, Pygame and pygame-menu.
+Currently it contains only three levels.
 
 ### ⏯️ To run
  - cd potato-arkanoid
  - python src/potato-arkanoid.py
+
+### 🐛 Issues that need fixing 🛠️
+- Ball direction when hit pad.
+- Enhance menu style.
 
 ### 📷 Screenshots 
 
