@@ -14,8 +14,23 @@ PLATINUM = (229, 228, 226)
 RED = (255,0,0)
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
-data_dir = os.path.join(main_dir, "assets/sounds")
+data_dir = os.path.join(main_dir, "../assets/sounds")
 global_score = 0
+
+class GameData():
+    def __init__(self, level):
+        self.level = level
+        self.score = 0
+    
+    def inc_score(self, score):
+        self.score += score
+
+    def inc_level(self):
+        self.level +=1
+
+    def reset_data(self):
+        self.level = 1
+        self.score = 0
 
 class Brick(pygame.sprite.Sprite):
     def __init__(self, posx, health, color, height):
@@ -59,7 +74,7 @@ class Pad(pygame.sprite.Sprite):
 
 class Ball(pygame.sprite.Sprite):
     
-    def __init__(self, color, width, height):
+    def __init__(self, color, width, height, gameData):
         super().__init__()
         self.image = pygame.Surface([width, height])
         self.image.fill(BLACK)
@@ -70,6 +85,7 @@ class Ball(pygame.sprite.Sprite):
         self.rect.x = screen.get_width() / 2
         self.rect.y = screen.get_height() / 2
         self.velocity = [-5,5]
+        self.gameData = gameData
 
     def update(self):
         if self.alive:
@@ -78,7 +94,7 @@ class Ball(pygame.sprite.Sprite):
             if self.rect.left < 0 or self.rect.right > screen.get_width(): 
                 self.velocity[0] = -self.velocity[0]
             if self.rect.bottom > screen.get_height():
-                gameOverScreen()
+                gameOverScreen(self.gameData)
             self.rect.move_ip((self.velocity))
       
     def bounce(self):
@@ -100,33 +116,45 @@ def load_sound(name):
     sound = pygame.mixer.Sound(fullname)
     return sound
 
-def gameOverScreen():
+def gameOverScreen(gameData):
     """Game over screen to restart"""
     pygame.mixer.music.load("./assets/music/game_over_music.mp3")
     pygame.mixer.music.play()
-    menu = pgmenu.Menu("Game over", screen.get_width(), screen.get_height(), theme=pgmenu.themes.THEME_GREEN)
-    menu.add.button("Play again!", mainLoop)
+    menu = pgmenu.Menu(f"Game over, You've failed level {gameData.level}", screen.get_width(), screen.get_height(), theme=pgmenu.themes.THEME_GREEN)
+    menu.add.button("Try again?", mainLoop, gameData)
     menu.add.button("Exit", pgmenu.events.EXIT)
     menu.mainloop(screen)
 
-def levelCompletedScreen():
+def levelCompletedScreen(gameData):
     """Level completed screen"""
     pygame.mixer.music.load("./assets/music/level_completed_music.mp3")
     pygame.mixer.music.play()
-    menu = pgmenu.Menu("You've won!", screen.get_width(), screen.get_height(), theme=pgmenu.themes.THEME_GREEN)
-    menu.add.button("Play again!", mainLoop)
+    menu = pgmenu.Menu(f"You've beaten level {gameData.level}!", screen.get_width(), screen.get_height(), theme=pgmenu.themes.THEME_GREEN)
+    gameData.inc_level()
+    menu.add.button("Next level!", mainLoop, gameData)
+    menu.add.button("Exit", pgmenu.events.EXIT)
+    menu.mainloop(screen)
+
+def creditsScreen(gameData):
+    """Shown when game is completed"""
+    pygame.mixer.music.load("./assets/music/credits_music.mp3")
+    pygame.mixer.music.play()
+    menu = pgmenu.Menu(f"You've beaten the game. Your score is {gameData.score}", screen.get_width(), screen.get_height(), theme=pgmenu.themes.THEME_GREEN)
+    gameData.reset_data()
+    menu.add.button("Start again?", mainLoop, gameData)
     menu.add.button("Exit", pgmenu.events.EXIT)
     menu.mainloop(screen)
 
 def menu():
     """Main menu"""
     pygame.mixer.music.play()
+    gameData = GameData(1)
     menu = pgmenu.Menu("Potato Arkanoid", screen.get_width(), screen.get_height(), theme=pgmenu.themes.THEME_GREEN)
-    menu.add.button("Jugar", mainLoop)
-    menu.add.button("Salir", pgmenu.events.EXIT)
+    menu.add.button("Play", mainLoop, gameData)
+    menu.add.button("Exit", pgmenu.events.EXIT)
     menu.mainloop(screen)
 
-def mainLoop():
+def mainLoop(gameData):
     """Main loop"""
     pygame.mixer.music.stop()
     sprites_list = pygame.sprite.Group()
@@ -138,7 +166,8 @@ def mainLoop():
     pad_bounce_ball_sound = load_sound("pad_bounce_ball.wav")
 
     pad = Pad(WHITE, 150, 25)
-    ball = Ball(WHITE, 10,10)
+    ball = Ball(WHITE, 10,10, gameData)
+
     sprites_list.add(pad)
     sprites_list.add(ball)
 
@@ -146,17 +175,28 @@ def mainLoop():
     ball.rect.y = pad.rect.top - 10
     offset = 10
 
-    for i in range(8):
-        brick_list.add(Brick((brick_width + offset) * i, 2, RED, 100))
-        brick_list.add(Brick((brick_width + offset) * i, 1, BLACK, 130))
-        brick_list.add(Brick((brick_width + offset) * i, 3, PLATINUM, 160))
+    if gameData.level == 1:
+        for i in range(8):
+            brick_list.add(Brick((brick_width + offset) * i, 1, RED, 100))
+            
+    if gameData.level == 2:
+        for i in range(8):
+            brick_list.add(Brick((brick_width + offset) * i, 2, RED, 100))
+            brick_list.add(Brick((brick_width + offset) * i, 1, BLACK, 130))
 
-    
+    if gameData.level == 3:
+        for i in range(8):
+            brick_list.add(Brick((brick_width + offset) * i, 2, RED, 100))
+            brick_list.add(Brick((brick_width + offset) * i, 1, BLACK, 130))
+            brick_list.add(Brick((brick_width + offset) * i, 3, PLATINUM, 160))            
+
+    if gameData.level == 4:
+        creditsScreen(gameData)
+        
     clock = pygame.time.Clock()
     running = True
     
-    while running:
-        
+    while running:        
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 running = False
@@ -165,14 +205,10 @@ def mainLoop():
 
         sprites_list.update()
         brick_list.update()
-
         screen.fill(DARKBLUE)
-
         pygame.draw.line(screen, WHITE, [0, 38], [800, 38], 2)
-
         sprites_list.draw(screen)
         brick_list.draw(screen)
-
         if(pygame.sprite.collide_mask(ball, pad)):
             pad_bounce_ball_sound.play()
             if ball.rect.x < pad.rect.centerx:
@@ -193,19 +229,22 @@ def mainLoop():
                 brick_list.remove(brick_hit)
                 destroy_brick_sound.play()
                 score_tracker += brick_hit.score
+                gameData.inc_score(score_tracker)
             else:
                 brick_hit.setColor(BLACK)
             ball.bounce()
 
         if len(brick_list) == 0:
-            levelCompletedScreen()
+            levelCompletedScreen(gameData)
 
         pad.handle_control(ball)
         
         textScore = font.render(f"Score: {score_tracker}", True, (WHITE))
         textScorePos = textScore.get_rect(centerx=90, y = 10)
+        textLevel = font.render(f"Current level: {gameData.level}", True, (WHITE))
+        textLevelPos = textLevel.get_rect(centerx=screen.get_width() - 100, y = 10)
         screen.blit(textScore, textScorePos)
-
+        screen.blit(textLevel, textLevelPos)
         pygame.display.flip()
         clock.tick(60)
     menu()
@@ -219,4 +258,3 @@ if __name__ == '__main__':
     pygame.mouse.set_visible(False)
     print(f'Screen initialized... {screen.get_width()} x {screen.get_height()}')
     menu()
-    
