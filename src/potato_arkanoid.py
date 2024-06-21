@@ -195,9 +195,10 @@ def mainLoop(gameData):
             brick_list.add(Brick((brick_width + offset) * i, 1, RED, 100))
             
     if gameData.level == 2:
-        for i in range(8):
-            brick_list.add(Brick((brick_width + offset) * i, 2, RED, 100))
-            brick_list.add(Brick((brick_width + offset) * i, 1, BLACK, 130))
+        creditsScreen(gameData)
+        # for i in range(8):
+        #     brick_list.add(Brick((brick_width + offset) * i, 2, RED, 100))
+        #     brick_list.add(Brick((brick_width + offset) * i, 1, BLACK, 130))
 
     if gameData.level == 3:
         for i in range(8):
@@ -243,7 +244,7 @@ def mainLoop(gameData):
                 brick_list.remove(brick_hit)
                 destroy_brick_sound.play()
                 score_tracker += brick_hit.score
-                gameData.inc_score(score_tracker)
+                gameData.inc_score(brick_hit.score)
             else:
                 brick_hit.setColor(BLACK)
             ball.bounce()
