@@ -21,6 +21,7 @@ class GameData():
     def __init__(self, level):
         self.level = level
         self.score = 0
+        self.lives = 3
     
     def inc_score(self, score):
         self.score += score
@@ -28,9 +29,13 @@ class GameData():
     def inc_level(self):
         self.level +=1
 
+    def dec_live(self):
+        self.lives -= 1
+
     def reset_data(self):
         self.level = 1
         self.score = 0
+        self.lives = 3
 
 class Brick(pygame.sprite.Sprite):
     def __init__(self, posx, health, color, height):
@@ -74,7 +79,7 @@ class Pad(pygame.sprite.Sprite):
 
 class Ball(pygame.sprite.Sprite):
     
-    def __init__(self, color, width, height, gameData):
+    def __init__(self, color, width, height, gameData, padRect):
         super().__init__()
         self.image = pygame.Surface([width, height])
         self.image.fill(BLACK)
@@ -84,7 +89,8 @@ class Ball(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.x = screen.get_width() / 2
         self.rect.y = screen.get_height() / 2
-        self.velocity = [-5,5]
+        self.padRect = padRect
+        self.velocity = [5,-5]
         self.gameData = gameData
 
     def update(self):
@@ -94,9 +100,18 @@ class Ball(pygame.sprite.Sprite):
             if self.rect.left < 0 or self.rect.right > screen.get_width(): 
                 self.velocity[0] = -self.velocity[0]
             if self.rect.bottom > screen.get_height():
-                gameOverScreen(self.gameData)
+                self.gameData.dec_live()
+                if self.gameData.lives == 0:
+                    gameOverScreen(self.gameData)
+                self.toggleAlive()
+                self.resetBall()
             self.rect.move_ip((self.velocity))
-      
+    
+    def resetBall(self):
+        self.rect.x = self.padRect.centerx        
+        self.rect.y = self.padRect.top - 15
+        
+    
     def bounce(self):
         self.velocity[1] = -self.velocity[1]
     
@@ -166,7 +181,7 @@ def mainLoop(gameData):
     pad_bounce_ball_sound = load_sound("pad_bounce_ball.wav")
 
     pad = Pad(WHITE, 150, 25)
-    ball = Ball(WHITE, 10,10, gameData)
+    ball = Ball(WHITE, 10,10, gameData, pad.rect)
 
     sprites_list.add(pad)
     sprites_list.add(ball)
@@ -209,18 +224,17 @@ def mainLoop(gameData):
         pygame.draw.line(screen, WHITE, [0, 38], [800, 38], 2)
         sprites_list.draw(screen)
         brick_list.draw(screen)
+
         if(pygame.sprite.collide_mask(ball, pad)):
             pad_bounce_ball_sound.play()
             if ball.rect.x < pad.rect.centerx:
                 if ball.velocity[0] > 0:
                     ball.velocity[0] = -ball.velocity[0] + (ball.rect.x / 2) * clock.tick(60) / 1000
-
             if ball.rect.x > pad.rect.centerx:
                 if ball.velocity[0] < 0:
                     ball.velocity[0] = -ball.velocity[0] + (ball.rect.x / 2) * clock.tick(60) / 1000
-
             ball.bounce()
-        
+
         brick_hit = pygame.sprite.spritecollideany(ball, brick_list)
         if brick_hit:
             brick_hit.health -= 1
@@ -240,11 +254,14 @@ def mainLoop(gameData):
         pad.handle_control(ball)
         
         textScore = font.render(f"Score: {score_tracker}", True, (WHITE))
-        textScorePos = textScore.get_rect(centerx=90, y = 10)
+        textScorePos = textScore.get_rect(centerx=70, y = 10)
         textLevel = font.render(f"Current level: {gameData.level}", True, (WHITE))
         textLevelPos = textLevel.get_rect(centerx=screen.get_width() - 100, y = 10)
+        textLives = font.render(f"Lives: {gameData.lives}", True, (WHITE))
+        textLivesPos = textLives.get_rect(centerx=screen.get_width() / 2, y = 10)
         screen.blit(textScore, textScorePos)
         screen.blit(textLevel, textLevelPos)
+        screen.blit(textLives, textLivesPos)
         pygame.display.flip()
         clock.tick(60)
     menu()
