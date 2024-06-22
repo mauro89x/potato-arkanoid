@@ -7,8 +7,7 @@ Currently it contains only three levels.
  - python src/potato-arkanoid.py
 
 ### 🐛 Issues that need fixing 🛠️
-- Ball direction when hit pad.
-- Enhance menu style.
+- Improve menu style.
 
 ### 📷 Screenshots 
 
