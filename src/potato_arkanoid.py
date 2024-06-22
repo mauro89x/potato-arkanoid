@@ -7,6 +7,7 @@ size = width, height  = 800, 600
 brick_width = 80
 brick_height = 20
 brick_offset = brick_width / 2
+
 BLACK = (0,0,0)
 WHITE = (255,255,255)
 DARKBLUE = (36,90,190)
@@ -14,6 +15,7 @@ GREEN = (0,255,0)
 LIGHTBLUE = (0,176,240)
 PLATINUM = (229, 228, 226)
 RED = (255,0,0)
+GREENISH_YELLOW = (199,255,51)
 
 main_dir = os.path.split(os.path.abspath(__file__))[0]
 data_dir = os.path.join(main_dir, "../assets/sounds")
@@ -74,9 +76,9 @@ class Pad(pygame.sprite.Sprite):
     def handle_control(self, ball):
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT] and self.rect.left > 0:
-            self.rect.move_ip(-10, 0)
+            self.rect.move_ip(-12, 0)
         if key[pygame.K_RIGHT] and self.rect.left < (width - self.rect.width):
-            self.rect.move_ip(10, 0)
+            self.rect.move_ip(12, 0)
         if key[pygame.K_SPACE] and not ball.alive:
             ball.toggleAlive()
         if not ball.alive:
@@ -118,6 +120,9 @@ class Ball(pygame.sprite.Sprite):
     def resetBall(self):
         self.rect.x = self.padRect.centerx        
         self.rect.y = self.padRect.top - 15
+        speedx = randint(1,9)
+        speedy = -9
+        self.velocity = [speedx, speedy]
         
     def set_velocity(self, xspeed, yspeed):
         self.velocity[0] = xspeed
@@ -175,7 +180,7 @@ def menu():
     """Main menu"""
     pygame.mixer.music.play()
     gameData = GameData(1)
-    menu = pgmenu.Menu("Potato Arkanoid", screen.get_width(), screen.get_height(), theme=pgmenu.themes.THEME_GREEN)
+    menu = pgmenu.Menu("Potato Arkanoid", screen.get_width(), screen.get_height(), theme=pgmenu.themes.THEME_BLUE)
     menu.add.button("Play", mainLoop, gameData)
     menu.add.button("Exit", pgmenu.events.EXIT)
     menu.mainloop(screen)
@@ -191,7 +196,7 @@ def mainLoop(gameData):
     hit_brick_sound = load_sound("brick_hit_not_destroy.wav")
     pad_bounce_ball_sound = load_sound("pad_bounce_ball.wav")    
     pad = Pad(WHITE, 150, 25)
-    ball = Ball(WHITE, 10,10, gameData, pad.rect)
+    ball = Ball(GREEN, 10,10, gameData, pad.rect)
 
     destroy_sound_channel = pygame.mixer.Channel(1)
     hit_brick_channel = pygame.mixer.Channel(2)
@@ -206,17 +211,30 @@ def mainLoop(gameData):
     if gameData.level == 1:
         for i in range(8):
             brick_list.add(Brick((brick_width + offset) * i, 1, RED, 100))
-            
+            brick_list.add(Brick((brick_width + offset) * i, 2, GREENISH_YELLOW, 130))
+            brick_list.add(Brick((brick_width + offset) * i, 1, BLACK, 160))
+
+        for i in range(4):
+            brick_list.add(Brick(( offset + screen.get_width() / 4) * i, 1, RED, 190))
+            brick_list.add(Brick(( offset + screen.get_width() / 4) * i, 1, BLACK, 220))
+
     if gameData.level == 2:
         for i in range(8):
             brick_list.add(Brick((brick_width + offset) * i, 2, RED, 100))
             brick_list.add(Brick((brick_width + offset) * i, 1, BLACK, 130))
+            brick_list.add(Brick((brick_width + offset) * i, 3, GREENISH_YELLOW, 160))
+
+        for i in range(4):
+            brick_list.add(Brick(( offset + screen.get_width() / 4) * i, 1, RED, 190))
+            brick_list.add(Brick(( offset + screen.get_width() / 4) * i, 1, BLACK, 220))
+            brick_list.add(Brick(( offset + screen.get_width() / 4) * i, 1, GREENISH_YELLOW, 250))
 
     if gameData.level == 3:
         for i in range(8):
             brick_list.add(Brick((brick_width + offset) * i, 2, RED, 100))
             brick_list.add(Brick((brick_width + offset) * i, 1, BLACK, 130))
             brick_list.add(Brick((brick_width + offset) * i, 3, PLATINUM, 160))            
+            brick_list.add(Brick((brick_width + offset) * i, 3, GREENISH_YELLOW, 190))            
 
     if gameData.level == 4:
         creditsScreen(gameData)
