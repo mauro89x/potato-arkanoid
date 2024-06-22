@@ -261,10 +261,11 @@ def mainLoop(gameData):
         brick_hit = pygame.sprite.spritecollideany(ball, brick_list)
         if brick_hit:
             brick_hit.health -= 1
-            hit_brick_channel.play(hit_brick_sound)
+            if not hit_brick_channel.get_busy():
+                hit_brick_channel.play(hit_brick_sound)
             if brick_hit.health == 0:
                 brick_list.remove(brick_hit)
-                if destroy_sound_channel.get_busy():
+                if not destroy_sound_channel.get_busy():
                     destroy_sound_channel.play(destroy_brick_sound)
                 score_tracker += brick_hit.score
                 gameData.inc_score(brick_hit.score)
