@@ -9,6 +9,7 @@ brick_offset = brick_width / 2
 BLACK = (0,0,0)
 WHITE = (255,255,255)
 DARKBLUE = (36,90,190)
+GREEN = (0,255,0)
 LIGHTBLUE = (0,176,240)
 PLATINUM = (229, 228, 226)
 RED = (255,0,0)
@@ -66,6 +67,9 @@ class Pad(pygame.sprite.Sprite):
         self.rect.x = screen.get_width() / 2
         self.rect.y = screen.get_height() - 30
 
+    def set_color(self, color):
+        self.image.fill(color)
+
     def handle_control(self, ball):
         key = pygame.key.get_pressed()
         if key[pygame.K_LEFT] and self.rect.left > 0:
@@ -101,6 +105,7 @@ class Ball(pygame.sprite.Sprite):
                 self.velocity[0] = -self.velocity[0]
             if self.rect.bottom > screen.get_height():
                 self.gameData.dec_live()
+                self.velocity = [5, -5]
                 if self.gameData.lives == 0:
                     gameOverScreen(self.gameData)
                 self.toggleAlive()
@@ -111,7 +116,10 @@ class Ball(pygame.sprite.Sprite):
         self.rect.x = self.padRect.centerx        
         self.rect.y = self.padRect.top - 15
         
-    
+    def set_velocity(self, xspeed, yspeed):
+        self.velocity[0] = xspeed
+        self.velocity[1] = yspeed
+
     def bounce(self):
         self.velocity[1] = -self.velocity[1]
     
@@ -195,10 +203,9 @@ def mainLoop(gameData):
             brick_list.add(Brick((brick_width + offset) * i, 1, RED, 100))
             
     if gameData.level == 2:
-        creditsScreen(gameData)
-        # for i in range(8):
-        #     brick_list.add(Brick((brick_width + offset) * i, 2, RED, 100))
-        #     brick_list.add(Brick((brick_width + offset) * i, 1, BLACK, 130))
+        for i in range(8):
+            brick_list.add(Brick((brick_width + offset) * i, 2, RED, 100))
+            brick_list.add(Brick((brick_width + offset) * i, 1, BLACK, 130))
 
     if gameData.level == 3:
         for i in range(8):
@@ -228,13 +235,24 @@ def mainLoop(gameData):
 
         if(pygame.sprite.collide_mask(ball, pad)):
             pad_bounce_ball_sound.play()
-            if ball.rect.x < pad.rect.centerx:
-                if ball.velocity[0] > 0:
-                    ball.velocity[0] = -ball.velocity[0] + (ball.rect.x / 2) * clock.tick(60) / 1000
-            if ball.rect.x > pad.rect.centerx:
-                if ball.velocity[0] < 0:
-                    ball.velocity[0] = -ball.velocity[0] + (ball.rect.x / 2) * clock.tick(60) / 1000
-            ball.bounce()
+            offset = ball.rect.centerx - pad.rect.centerx
+            if offset > 0:
+                    if offset > 50 and offset < 75:  
+                        ball.velocity[0] = 9
+                    elif offset > 25 and offset < 49:                 
+                        ball.velocity[0] = 6
+                    elif offset > 15 and offset < 24:
+                        ball.velocity[0] = 4
+            else:  
+                    if offset < -50 and offset > -75:
+                        ball.velocity[0] = -9
+                    elif offset < -25 and offset > -49:
+                        ball.velocity[0] = -6
+                    elif offset < -15 and offset > -24:
+                        ball.velocity[0] = -4
+
+            ball.velocity[1] = -ball.velocity[1]
+            print(ball.velocity[0])
 
         brick_hit = pygame.sprite.spritecollideany(ball, brick_list)
         if brick_hit:
