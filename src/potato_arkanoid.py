@@ -1,6 +1,7 @@
 import pygame
 import pygame_menu as pgmenu
 import os
+from random import randint
 
 size = width, height  = 800, 600
 brick_width = 80
@@ -28,7 +29,7 @@ class GameData():
         self.score += score
 
     def inc_level(self):
-        self.level +=1
+        self.level += 1
 
     def dec_live(self):
         self.lives -= 1
@@ -94,7 +95,9 @@ class Ball(pygame.sprite.Sprite):
         self.rect.x = screen.get_width() / 2
         self.rect.y = screen.get_height() / 2
         self.padRect = padRect
-        self.velocity = [5,-5]
+        speedx = randint(1,9)
+        speedy = -9
+        self.velocity = [speedx, speedy]
         self.gameData = gameData
 
     def update(self):
@@ -186,10 +189,12 @@ def mainLoop(gameData):
     score_tracker = 0
     destroy_brick_sound = load_sound("brick_destroy.wav")
     hit_brick_sound = load_sound("brick_hit_not_destroy.wav")
-    pad_bounce_ball_sound = load_sound("pad_bounce_ball.wav")
-
+    pad_bounce_ball_sound = load_sound("pad_bounce_ball.wav")    
     pad = Pad(WHITE, 150, 25)
     ball = Ball(WHITE, 10,10, gameData, pad.rect)
+
+    destroy_sound_channel = pygame.mixer.Channel(1)
+    hit_brick_channel = pygame.mixer.Channel(2)
 
     sprites_list.add(pad)
     sprites_list.add(ball)
@@ -252,15 +257,15 @@ def mainLoop(gameData):
                         ball.velocity[0] = -4
 
             ball.velocity[1] = -ball.velocity[1]
-            print(ball.velocity[0])
 
         brick_hit = pygame.sprite.spritecollideany(ball, brick_list)
         if brick_hit:
             brick_hit.health -= 1
-            hit_brick_sound.play()
+            hit_brick_channel.play(hit_brick_sound)
             if brick_hit.health == 0:
                 brick_list.remove(brick_hit)
-                destroy_brick_sound.play()
+                if destroy_sound_channel.get_busy():
+                    destroy_sound_channel.play(destroy_brick_sound)
                 score_tracker += brick_hit.score
                 gameData.inc_score(brick_hit.score)
             else:
@@ -292,5 +297,4 @@ if __name__ == '__main__':
     screen = pygame.display.set_mode((size))
     pygame.display.set_caption("Potato Arkanoid")
     pygame.mouse.set_visible(False)
-    print(f'Screen initialized... {screen.get_width()} x {screen.get_height()}')
     menu()
