@@ -11,9 +11,9 @@ Currently it contains only three levels.
 
 ### 📷 Screenshots 
 
-![image](https://github.com/mauro89x/potato-arkanoid/assets/49578672/62e8084f-aa9c-46a6-b346-97095fc0e449)
+![image](https://github.com/mauro89x/potato-arkanoid/assets/49578672/c2cdf088-9887-44e8-ba44-60f47bf9044f)
 
-![image](https://github.com/mauro89x/potato-arkanoid/assets/49578672/63f3135f-e581-440f-9033-dd7df11c00ac)
+![image](https://github.com/mauro89x/potato-arkanoid/assets/49578672/fa9361c6-f8b1-4e5c-a09d-a91b87d56ebf)
 
 #### Credits 🙏
 
